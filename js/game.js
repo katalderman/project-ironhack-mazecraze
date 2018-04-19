@@ -1,14 +1,16 @@
 // Create the canvas
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
+var hWalls;
+var vWalls;
 
-// Basic dimensions of the maze and avatar
-var avatarSize = 32;
-var horizontalCells = 15;
-var verticalCells = 15;
-var cellSize = 50;
+// Basic dimensions of the maze and player
+var playerSize = 32;
+var horizontalCells = 10;
+var verticalCells = 10;
+var cellSize = 75;
 
-canvas.width = 200 + cellSize * horizontalCells;
+canvas.width = 200+ cellSize * horizontalCells;
 canvas.height = cellSize * verticalCells;
 document.body.appendChild(canvas);
 
@@ -19,13 +21,13 @@ var theMaze = (function() {
   var horizontalCells;
   var verticalCells;
   var cellSize;
-  var wallThickness = 16;
+  var wallThickness = 15;
   // A 2D array to know if a cell is reachable; used during maze generation
   var visited = [];
   // A 2D array to know where the vertical walls are
-  var vWalls = [];
+   vWalls = [];
   // A 2D array to know where the horizontal walls are
-  var hWalls = [];
+   hWalls = [];
   /**
    * @param {int} _horizontalCells number of cells on the horizontal axis
    * @param {int} _verticalCells number of cells on the vertical axis
@@ -80,10 +82,8 @@ var theMaze = (function() {
     return (unvisitedNeighbors);
   };
   /**
-   * Generates the maze itself; i.e. fills up the wall variables vWalls and hWalls
-   * It uses a simple depth first random navigation.
-   * The path variable is used as a LIFO structure to back track
-   * when we reach a dead end.
+   * Generates the maze itself; i.e. fills up the wall variables vWalls and hWalls (depth first random navigation)
+   * The path variable is used as a LIFO structure to back track when a dead end is reached
    */
   var generateMaze = function() {
     // current cell for generation
@@ -137,77 +137,76 @@ var theMaze = (function() {
     }
     ctx.strokeStyle = 'black';
     ctx.stroke();
-  ctx.lineCap = "round";
   };
   /**
-   * Modifies the attributes of avatar to update its position.
-   * @param {objects} avatar the avatar object, that contains position data
+   * Modifies the attributes of player to update its position.
+   * @param {objects} player the player object, that contains position data
    * @param {array} keysPressed an array that contains key pressed data
    * @param {double} modifier a double to indicate how much time has passed since the last update
    */
-  var updatePositions = function(avatar, keysPressed, modifier) {
-    var targetX = avatar.x;
-    var targetY = avatar.y;
+  var updatePositions = function(player, keysPressed, modifier) {
+    var targetX = player.x;
+    var targetY = player.y;
     // First update pixel-position
     if (38 in keysPressed) { // Player holding up
-      targetY = avatar.y - Math.min(avatar.speed * modifier, cellSize);
-      if (hWalls[avatar.cellY][avatar.cellX] === 1 ||
-        (((avatar.cellX + 1) * cellSize - avatar.x) < wallThickness &&
-        vWalls[avatar.cellY - 1][avatar.cellX + 1] === 1) ||
-          ((avatar.x - avatar.cellX * cellSize) < wallThickness &&
-          vWalls[avatar.cellY - 1][avatar.cellX] === 1)) {
-        avatar.y = Math.max(targetY,
-        avatar.cellY * cellSize + wallThickness);
+      targetY = player.y - Math.min(player.speed * modifier, cellSize);
+      if (hWalls[player.cellY][player.cellX] === 1 ||
+        (((player.cellX + 1) * cellSize - player.x) < wallThickness &&
+        vWalls[player.cellY - 1][player.cellX + 1] === 1) ||
+          ((player.x - player.cellX * cellSize) < wallThickness &&
+          vWalls[player.cellY - 1][player.cellX] === 1)) {
+        player.y = Math.max(targetY,
+        player.cellY * cellSize + wallThickness);
       } else {
-        avatar.y = targetY;
+        player.y = targetY;
       }
-      avatar.cellY = Math.floor(avatar.y / cellSize);
+      player.cellY = Math.floor(player.y / cellSize);
     }
     if (40 in keysPressed) { // Player holding down
-      targetY = avatar.y + Math.min(avatar.speed * modifier, cellSize);
-      if (hWalls[avatar.cellY + 1][avatar.cellX] === 1 ||
-        (((avatar.cellX + 1) * cellSize - avatar.x) < wallThickness &&
-        vWalls[avatar.cellY + 1][avatar.cellX + 1] === 1) ||
-          ((avatar.x - avatar.cellX * cellSize) < wallThickness &&
-          vWalls[avatar.cellY + 1][avatar.cellX] === 1)) {
-        avatar.y = Math.min(targetY,
-        (avatar.cellY + 1) * cellSize - wallThickness);
+      targetY = player.y + Math.min(player.speed * modifier, cellSize);
+      if (hWalls[player.cellY + 1][player.cellX] === 1 ||
+        (((player.cellX + 1) * cellSize - player.x) < wallThickness &&
+        vWalls[player.cellY + 1][player.cellX + 1] === 1) ||
+          ((player.x - player.cellX * cellSize) < wallThickness &&
+          vWalls[player.cellY + 1][player.cellX] === 1)) {
+        player.y = Math.min(targetY,
+        (player.cellY + 1) * cellSize - wallThickness);
       } else {
-        avatar.y += avatar.speed * modifier;
+        player.y += player.speed * modifier;
       }
-      avatar.cellY = Math.floor(avatar.y / cellSize);
+      player.cellY = Math.floor(player.y / cellSize);
     }
     if (37 in keysPressed) { // Player holding left
-      targetX = avatar.x - Math.min(avatar.speed * modifier, cellSize);
-      if (vWalls[avatar.cellY][avatar.cellX] === 1 ||
-        (((avatar.cellY + 1) * cellSize - avatar.y) < wallThickness &&
-        hWalls[avatar.cellY + 1][avatar.cellX - 1] === 1) ||
-          ((avatar.y - avatar.cellY * cellSize) < wallThickness &&
-          hWalls[avatar.cellY][avatar.cellX - 1] === 1)) {
-        avatar.x = Math.max(targetX,
-        avatar.cellX * cellSize + wallThickness);
+      targetX = player.x - Math.min(player.speed * modifier, cellSize);
+      if (vWalls[player.cellY][player.cellX] === 1 ||
+        (((player.cellY + 1) * cellSize - player.y) < wallThickness &&
+        hWalls[player.cellY + 1][player.cellX - 1] === 1) ||
+          ((player.y - player.cellY * cellSize) < wallThickness &&
+          hWalls[player.cellY][player.cellX - 1] === 1)) {
+        player.x = Math.max(targetX,
+        player.cellX * cellSize + wallThickness);
       } else {
-        avatar.x -= avatar.speed * modifier;
+        player.x -= player.speed * modifier;
       }
-      avatar.cellX = Math.floor(avatar.x / cellSize);
+      player.cellX = Math.floor(player.x / cellSize);
     }
     if (39 in keysPressed) { // Player holding right
-      targetX = avatar.x + Math.min(avatar.speed * modifier, cellSize);
-      if (vWalls[avatar.cellY][avatar.cellX + 1] === 1 ||
-        (((avatar.cellY + 1) * cellSize - avatar.y) < wallThickness &&
-        hWalls[avatar.cellY + 1][avatar.cellX + 1] === 1) ||
-          ((avatar.y - avatar.cellY * cellSize) < wallThickness &&
-          hWalls[avatar.cellY][avatar.cellX + 1] === 1)) {
-        avatar.x = Math.min(targetX,
-        (avatar.cellX + 1) * cellSize - wallThickness);
+      targetX = player.x + Math.min(player.speed * modifier, cellSize);
+      if (vWalls[player.cellY][player.cellX + 1] === 1 ||
+        (((player.cellY + 1) * cellSize - player.y) < wallThickness &&
+        hWalls[player.cellY + 1][player.cellX + 1] === 1) ||
+          ((player.y - player.cellY * cellSize) < wallThickness &&
+          hWalls[player.cellY][player.cellX + 1] === 1)) {
+        player.x = Math.min(targetX,
+        (player.cellX + 1) * cellSize - wallThickness);
       } else {
-        avatar.x += avatar.speed * modifier;
+        player.x += player.speed * modifier;
       }
-      avatar.cellX = Math.floor(avatar.x / cellSize);
+      player.cellX = Math.floor(player.x / cellSize);
     }
     // Then update cell-position
-    avatar.cellY = Math.floor(avatar.y / cellSize);
-    avatar.cellX = Math.floor(avatar.x / cellSize);
+    player.cellY = Math.floor(player.y / cellSize);
+    player.cellX = Math.floor(player.x / cellSize);
 
 
 
@@ -225,14 +224,14 @@ var startTime;
 var lastUpdateTime = Date.now();
 var bestTime = 'None';
 
-// Avatar
-var avatarReady = false;
-var avatarImage = new Image();
-avatarImage.onload = function() {
-  avatarReady = true;
+// player
+var playerReady = false;
+var playerImage = new Image();
+playerImage.onload = function() {
+  playerReady = true;
 };
-avatarImage.src = 'images/avatar.png';
-var avatar = {
+playerImage.src = 'images/player.gif';
+var player = {
   speed: 256 // movement in pixels per second
 };
 
@@ -242,10 +241,10 @@ var goalImage = new Image();
 goalImage.onload = function() {
   goalReady = true;
 };
-goalImage.src = 'images/goal.png';
+goalImage.src = 'images/goal.gif';
 var goal = {};
 
-var enemyY = 0; // kat
+var enemyY = 0; // enemyY
 
 // Enemy
 var enemyReady = false;
@@ -253,7 +252,7 @@ var enemyImage = new Image();
 enemyImage.onload = function() {
   enemyReady = true;
 };
-enemyImage.src = 'images/enemy2.png';
+enemyImage.src = 'images/enemy.gif';
 var enemy = {
   speed: 256 // movement in pixels per second
 };
@@ -269,19 +268,19 @@ addEventListener('keyup', function(e) {
 }, false);
 
 /**
- * Resets avatar and goal locations, generates a new maze, and sets the starting time
+ * Resets player and goal locations, generates a new maze, and sets the starting time
  */
 var reset = function() {
-  // Initialize avatar and goal in random locations
-  avatar.cellX = Math.floor(Math.random() * horizontalCells);
-  avatar.cellY = Math.floor(Math.random() * verticalCells);
-  avatar.x = (avatar.cellX + 0.5) * cellSize;
-  avatar.y = (avatar.cellY + 0.5) * cellSize;
+  // Initialize player and goal in random locations
+  player.cellX = Math.floor(Math.random() * horizontalCells);
+  player.cellY = Math.floor(Math.random() * verticalCells);
+  player.x = (player.cellX + 0.5) * cellSize;
+  player.y = (player.cellY + 0.5) * cellSize;
   goal.cellX = Math.floor(Math.random() * horizontalCells);
   goal.cellY = Math.floor(Math.random() * verticalCells);
   goal.x = (goal.cellX + 0.5) * cellSize;
   goal.y = (goal.cellY + 0.5) * cellSize;
-  // ---KAT---
+  // ---enemy---
   enemy.cellX = Math.floor(Math.random() * horizontalCells);
   enemy.cellY = Math.floor(Math.random() * verticalCells);
   enemy.x = (enemy.cellX + 0.5) * cellSize;
@@ -291,25 +290,60 @@ var reset = function() {
   theMaze.init(horizontalCells, verticalCells, cellSize);
   theMaze.generateMaze();
   startTime = Date.now();
+  enemyMove();
 };
 
+function enemyMove(){
+  setInterval(function(){
+    // console.log(enemy.x,enemy.y);
 
+if (enemy.x < player.x && enemy.y < player.y){
+  enemy.x++;
+  enemy,y++;
+} else if 
+  (enemy.x > player.x && enemy.y < player.y){
+enemy.x--;
+enemy.y++;
+} else if
+(enemy.x < player.x && enemy.y > player.y){
+  enemy.x++;
+  enemy.y--;
+} else if
+(enemy.x > player.x && enemy.y > player.y){
+  enemy.x--;
+  enemy.y--;
+} else if
+(enemy.x > player.x && enemy.y == player.y){
+  enemy.x--;
+} else if
+(enemy.x < player.x && enemy.y == player.y){
+  enemy.x++;
+} else if
+(enemy.x == player.x && enemy.y < player.y){
+  enemy.y++;
+} else if
+(enemy.x == player.x && enemy.y > player.y){
+  enemy.y--;
+}
+
+},50) // higher = enemy moves slower
+}
 
 /**
  * Updates all the game elements: distances between objects, positions, and checks for termination condition
  * @param {double} modifier a double to indicate how much time has passed since the last update
  */
 var update = function(modifier) {
-  // Update distances and avatar's radar
-  // var distanceToGoal = Math.pow(Math.pow(avatar.x - goal.x, 2) +
-  // Math.pow(avatar.y - goal.y, 2), 0.5);
+  // Update distances and player's radar
+  // var distanceToGoal = Math.pow(Math.pow(player.x - goal.x, 2) +
+  // Math.pow(player.y - goal.y, 2), 0.5);
   // radius = (radius + (1 / (distanceToGoal / diagonal) - 1)) %
   //  (distanceToGoal / 2);
-  // Update the avatar's position based on the maze design
-  theMaze.updatePositions(avatar, keysDown, modifier);
-  // If the avatar reaches the goal, reset the game
-  if (Math.abs(avatar.x - goal.x) < 0.2 * cellSize &&
-  Math.abs(avatar.y - goal.y) < 0.2 * cellSize) {
+  // Update the player's position based on the maze design
+  theMaze.updatePositions(player, keysDown, modifier);
+  // If the player reaches the goal, reset the game
+  if (Math.abs(player.x - goal.x) < 0.2 * cellSize &&
+  Math.abs(player.y - goal.y) < 0.2 * cellSize) {
     var thisTime = ((Date.now() - startTime) / 1000);
     console.log(thisTime);
     console.log(bestTime);
@@ -324,35 +358,34 @@ var update = function(modifier) {
 };
 
 /**
- * Renders all the objects on the canvas: the maze, the avatar, the goal, and score information
+ * Renders all the objects on the canvas: the maze, the player, the goal, and score information
  */
 var render = function() {
   // Clear all
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // Draw the maze
   theMaze.drawMaze();
-  // Draw the goal and the avatar
+  // Draw the goal, player and enemy
   if (goalReady) {
-    ctx.drawImage(goalImage, goal.x - avatarSize / 2, goal.y - avatarSize / 2);
+    ctx.drawImage(goalImage, goal.x - playerSize / 2, goal.y - playerSize / 2);
   }
-  if (avatarReady) {
-    ctx.drawImage(avatarImage, avatar.x - avatarSize / 2,
-      avatar.y - 0.75 * avatarSize);
+  if (playerReady) {
+    ctx.drawImage(playerImage, player.x - playerSize / 2,
+      player.y - 0.75 * playerSize);
   }
-  // draw the enemy ---KAT---
   if (enemyReady) {
-    ctx.drawImage(enemyImage, enemy.x - avatarSize / 2, enemy.y - avatarSize / 2);
+    ctx.drawImage(enemyImage, enemy.x - playerSize / 2, enemy.y - playerSize / 2);
   }
 
   // Draw timer
   ctx.strokeStyle = 'black';
-  ctx.fillStyle = 'white';
+  ctx.fillStyle = 'black';
   ctx.font = '24px Helvetica';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   var currentTime = ((Date.now() - startTime) / 1000).toFixed(2);
-  ctx.fillText('Time: ' + currentTime, canvas.width - 128, 32);
-  ctx.fillText('Best: ' + bestTime, canvas.width - 128, 64);
+  ctx.fillText('Time: ' + currentTime, canvas.width - 160, 32);
+  ctx.fillText('Best: ' + bestTime, canvas.width - 160, 64);
 };
 
 /**
@@ -381,3 +414,66 @@ w.mozRequestAnimationFrame;
 // Actual functions called
 reset();
 main();
+
+
+
+// wrote this for enemy movement -- unused in final
+// switch (enemyDirection) {
+
+//   case "down":
+//   // down
+//         targetY = enemy.y + cellSize;
+//         if (hWalls[enemy.y + 1][enemy.x] === 1 ||
+//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
+//           vWalls[enemy.y + 1][enemy.x + 1] === 1) ||
+//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
+//             vWalls[enemy.y + 1][enemy.x] === 1)) {
+//           enemy.y = Math.min(targetY,
+//           (enemy.y + 1) * cellSize - wallThickness);
+//         } else {
+//           enemy.y += 1;
+//         }
+//         break;
+//         case "up":
+//         // up
+//         targetY = enemy.y + cellSize;
+//         if (hWalls[enemy.y + 1][enemy.x] === 1 ||
+//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
+//           vWalls[enemy.y + 1][enemy.x + 1] === 1) ||
+//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
+//             vWalls[enemy.y + 1][enemy.x] === 1)) {
+//           enemy.y = Math.min(targetY,
+//           (enemy.y - 1) * cellSize - wallThickness);
+//         } else {
+//           enemy.y -= 1;
+//         }
+//         break;
+//         case "right":
+//         // right
+//         targetX = enemy.x + cellSize;
+//         if (vWalls[enemy.x + 1][enemy.x] === 1 ||
+//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
+//           hWalls[enemy.x + 1][enemy.x + 1] === 1) ||
+//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
+//             hWalls[enemy.x + 1][enemy.x] === 1)) {
+//           enemy.x = Math.min(targetX,
+//           (enemy.x + 1) * cellSize - wallThickness);
+//         } else {
+//           enemy.x += 1;
+//         }
+//         break;
+//         case "left":
+//          // left
+//               targetX = enemy.x + cellSize;
+//               if (vWalls[enemy.x + 1][enemy.x] === 1 ||
+//                 (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
+//                 hWalls[enemy.x + 1][enemy.x + 1] === 1) ||
+//                   ((enemy.x - enemy.x * cellSize) < wallThickness &&
+//                   hWalls[enemy.x + 1][enemy.x] === 1)) {
+//                 enemy.x = Math.min(targetX,
+//                 (enemy.x - 1) * cellSize - wallThickness);
+//               } else {
+//               }
+//               break;
+//             }
+//     },100)
