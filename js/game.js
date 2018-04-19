@@ -299,7 +299,7 @@ function enemyMove(){
 
 if (enemy.x < player.x && enemy.y < player.y){
   enemy.x++;
-  enemy,y++;
+  enemy.y++;
 } else if 
   (enemy.x > player.x && enemy.y < player.y){
 enemy.x--;
@@ -330,20 +330,15 @@ enemy.y++;
 }
 
 /**
- * Updates all the game elements: distances between objects, positions, and checks for termination condition
+ * Updates all the game elements: positions and checks for termination condition
  * @param {double} modifier a double to indicate how much time has passed since the last update
  */
 var update = function(modifier) {
-  // Update distances and player's radar
-  // var distanceToGoal = Math.pow(Math.pow(player.x - goal.x, 2) +
-  // Math.pow(player.y - goal.y, 2), 0.5);
-  // radius = (radius + (1 / (distanceToGoal / diagonal) - 1)) %
-  //  (distanceToGoal / 2);
   // Update the player's position based on the maze design
   theMaze.updatePositions(player, keysDown, modifier);
   // If the player reaches the goal, reset the game
-  if (Math.abs(player.x - goal.x) < 0.2 * cellSize &&
-  Math.abs(player.y - goal.y) < 0.2 * cellSize) {
+  if (Math.abs(player.x - goal.x) < 0.5 * cellSize &&
+  Math.abs(player.y - goal.y) < 0.5 * cellSize) {
     var thisTime = ((Date.now() - startTime) / 1000);
     console.log(thisTime);
     console.log(bestTime);
@@ -387,6 +382,21 @@ var render = function() {
   ctx.fillText('Time: ' + currentTime, canvas.width - 160, 32);
   ctx.fillText('Best: ' + bestTime, canvas.width - 160, 64);
 };
+
+
+// collision detection -- KAT NEEDS TO WORK ON THIS
+// function isCollide(player, enemy) {
+//   return !(
+//       ((player.y + player.height) < (enemy.y)) ||
+//       (player.y > (enemy.y + enemy.height)) ||
+//       ((player.x + player.width) < enemy.x) ||
+//       (player.x > (enemy.x + enemy.width))
+//   );
+// }
+
+
+
+
 
 /**
  * The main game loop
