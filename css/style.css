@@ -1,14 +1,20 @@
 body {
-  background-color: white;
   color: black;
+  margin: 0;
 }
 
-div{
+html { 
+  background: url(../images/background-maze.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+div {
   width: 100%;
   margin: 0 auto;
-  background-color: black;
 }
-
 
 canvas {
   padding-left: 0;
@@ -18,3 +24,75 @@ canvas {
   display: block;
   width: 800px;
 }
+
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+	color: #343434;
+	font-weight: bold;
+	font-family: 'arial', sans-serif;   
+	font-size: 36px;
+  text-transform: uppercase;
+  margin-top: -25px;
+}
+
+
+.game-over {
+  position: absolute;
+  top: 300px;
+  left: 300px;
+  color: #FF0000;
+  font-family: Helvetica, sans-serif;
+  font-size: 30px;
+  cursor: default;
+  display: none;
+  background-color: #343434;
+  width: 1000px;
+  height: 500px;
+  text-align: center;
+vertical-align: middle;
+padding-top: 50px;
+}
+
+.game-over span {
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+}
+.game-over span:hover {
+  color: #FFD700;
+}
+
+
+
+
+.you-lost {
+  position: absolute;
+  top: 300px;
+  left: 300px;
+  color: #FF0000;
+  font-family: Helvetica, sans-serif;
+  font-size: 30px;
+  cursor: default;
+  display: none;
+  background-color: #343434;
+  width: 1000px;
+  height: 500px;
+  text-align: center;
+vertical-align: middle;
+padding-top: 50px;
+}
+
+.you-lost span {
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+}
+.you-lost span:hover {
+  color: #FFD700;
+}
+

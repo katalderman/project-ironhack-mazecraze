@@ -204,13 +204,12 @@ var theMaze = (function() {
       }
       player.cellX = Math.floor(player.x / cellSize);
     }
+
     // Then update cell-position
     player.cellY = Math.floor(player.y / cellSize);
     player.cellX = Math.floor(player.x / cellSize);
-
-
-
   };
+
   return {
     init: init,
     generateMaze: generateMaze,
@@ -285,7 +284,7 @@ var reset = function() {
   enemy.cellY = Math.floor(Math.random() * verticalCells);
   enemy.x = (enemy.cellX + 0.5) * cellSize;
   enemy.y = (enemy.cellY + 0.5) * cellSize;
-
+  
   // Initialize, generate a random maze, and sets the starting time
   theMaze.init(horizontalCells, verticalCells, cellSize);
   theMaze.generateMaze();
@@ -293,10 +292,10 @@ var reset = function() {
   enemyMove();
 };
 
+// enemy chasing player movement
 function enemyMove(){
   setInterval(function(){
-    // console.log(enemy.x,enemy.y);
-
+    // console.log(enemy.x,enemy.y,player.x, player.y);
 if (enemy.x < player.x && enemy.y < player.y){
   enemy.x++;
   enemy.y++;
@@ -324,9 +323,8 @@ enemy.y++;
 } else if
 (enemy.x == player.x && enemy.y > player.y){
   enemy.y--;
-}
-
-},50) // higher = enemy moves slower
+} 
+},40) // higher = enemy moves slower
 }
 
 /**
@@ -341,16 +339,22 @@ var update = function(modifier) {
   Math.abs(player.y - goal.y) < 0.5 * cellSize) {
     var thisTime = ((Date.now() - startTime) / 1000);
     console.log(thisTime);
-    console.log(bestTime);
+    // console.log(bestTime);
     console.log(Date.now());
     console.log(startTime);
     if (bestTime === 'None' || thisTime < bestTime) {
       console.log('changing besttime');
       bestTime = thisTime;
     }
+
+
+    return gameOver();
     reset();
   }
 };
+
+
+
 
 /**
  * Renders all the objects on the canvas: the maze, the player, the goal, and score information
@@ -380,21 +384,33 @@ var render = function() {
   ctx.textBaseline = 'top';
   var currentTime = ((Date.now() - startTime) / 1000).toFixed(2);
   ctx.fillText('Time: ' + currentTime, canvas.width - 160, 32);
-  ctx.fillText('Best: ' + bestTime, canvas.width - 160, 64);
+  // ctx.fillText('Best: ' + bestTime, canvas.width - 160, 64);
+
+
+  collides();
 };
 
+// collision detection
+// console.log("player is: ", player)
+function collides() {
 
-// collision detection -- KAT NEEDS TO WORK ON THIS
-// function isCollide(player, enemy) {
-//   return !(
-//       ((player.y + player.height) < (enemy.y)) ||
-//       (player.y > (enemy.y + enemy.height)) ||
-//       ((player.x + player.width) < enemy.x) ||
-//       (player.x > (enemy.x + enemy.width))
-//   );
-// }
+  if(Math.abs(player.x - enemy.x) <= 50 && Math.abs(player.y - enemy.y) <= 50){
+    // alert("noooo!")
+      document.getElementById('you-lost').style.display = "block";
+    };
+  }
+
+  // if( player.x < enemy.x + enemy.width &&
+  //        player.x + player.width > enemy.x &&
+  //        player.y < enemy.y + enemy.height &&
+  //        player.y + player.height > enemy.y) {
+        
 
 
+//it's game over dudes
+var gameOver = function() {
+  document.getElementById('game-over').style.display = "block";
+};
 
 
 
@@ -424,8 +440,6 @@ w.mozRequestAnimationFrame;
 // Actual functions called
 reset();
 main();
-
-
 
 // wrote this for enemy movement -- unused in final
 // switch (enemyDirection) {
