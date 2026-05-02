@@ -61,43 +61,46 @@ project-ironhack-mazecraze/
 This game is deployed on GitHub Pages. Visit the link in the repository URL section to play online.
 
 ## Best Practices Applied
-✓ Separate HTML, CSS, and JavaScript files
-✓ Organized folder structure (css/, js/, images/)
-✓ Semantic HTML markup
-✓ DRY principles applied to CSS styling
-✓ Clean, well-commented JavaScript code
-✓ Proper game loop implementation with requestAnimationFrame
-✓ Collision detection with boundary checking
-✓ Meaningful alt text for images
+- ✅ Separate HTML, CSS, and JavaScript files
+- ✅ Organized folder structure (css/, js/, images/)
+- ✅ Semantic HTML markup
+- ✅ DRY principles applied to CSS styling
+- ✅ Clean, well-commented JavaScript code
+- ✅ Proper game loop implementation with requestAnimationFrame
+- ✅ Collision detection with boundary checking
+- ✅ Meaningful alt text for images
 
---------------------REQUIREMENTS------------------
+## Ironhack Project Requirements
+
+### Requirements
 The app must:
 - Render a game in the browser
 - Use Javascript or jQuery for DOM manipulation
- - Design logic for winning & visually display win/lose
-- Be depoloyed online to GitHub Pages, where the rest of the world can access it
+- Design logic for winning & visually display win/lose
+- Be deployed online to GitHub Pages, where the rest of the world can access it
 - Look visually appealing
---------------------BEST PRACTICES REQUIRED------------------
+
+### Best Practices Required
 - Include separate HTML / CSS / JavaScript files
-- Create a separate folder for all the js files, one for all the images, one for all the css, etc. 
+- Create a separate folder for all the js files, one for all the images, one for all the css, etc.
 - The main page MUST be called index.html
-- You must have a readme file that include a description of the game, etc.(create one manually, do not check the box on github)
-- Stick with KISS (Keep It Simple Stupid) and DRY (Don’t Repeat Yourself) principles
+- You must have a readme file that include a description of the game, etc. (create one manually, do not check the box on github)
+- Stick with KISS (Keep It Simple Stupid) and DRY (Don't Repeat Yourself) principles
 - Use semantic markup for HTML and CSS (adhere to best practices)
 - Make sure to indent code (can use a plugin for VS code called beautify)
 
-BONUS 
+### Bonus Features
 - Switch turns between two players
-- Create a mobile version 
+- Create a mobile version
 - Make the game responsive
 
-Necessary Deliverables
+### Necessary Deliverables
 A working game that runs in the browser
 A deploy of the game in GitHub Pages
 A link to the hosted working game in the URL section of your GitHub repo
 A readme.md file with explanations of the technologies used, the approach taken, installation instructions, unsolved problems, etc.
 
-Suggested Ways to Get Started
+### Suggested Ways to Get Started
 Tips
 -You can find some sample landing pages at w3layouts.com/games (or by googling similar things)
 -Break the project down into different steps (logic & data structures, layout and rendering, DOM manipulation & user interaction). Use whiteboards to conceptualize your game!
