@@ -11,7 +11,7 @@ html {
   background-size: cover;
 }
 
-div {
+.game-container {
   width: 100%;
   margin: 0 auto;
 }
@@ -37,62 +37,56 @@ h1 {
 	font-family: 'arial', sans-serif;   
 	font-size: 36px;
   text-transform: uppercase;
-  margin-top: -25px;
+  margin: 20px 0;
 }
 
+.header {
+  text-align: center;
+}
 
-.game-over {
-  position: absolute;
-  top: 300px;
-  left: 300px;
+.overlay-container {
+  position: relative;
+}
+
+.game-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: #FF0000;
   font-family: Helvetica, sans-serif;
   font-size: 30px;
   cursor: default;
   display: none;
   background-color: #343434;
-  width: 1000px;
-  height: 500px;
+  width: 90%;
+  max-width: 800px;
+  padding: 50px 20px;
   text-align: center;
-vertical-align: middle;
-padding-top: 50px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+  z-index: 1000;
 }
 
-.game-over span {
+.game-overlay img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.restart-btn {
   font-size: 20px;
   cursor: pointer;
-  position: relative;
-}
-.game-over span:hover {
-  color: #FFD700;
-}
-
-
-
-
-.you-lost {
-  position: absolute;
-  top: 300px;
-  left: 300px;
-  color: #FF0000;
-  font-family: Helvetica, sans-serif;
-  font-size: 30px;
-  cursor: default;
-  display: none;
-  background-color: #343434;
-  width: 1000px;
-  height: 500px;
-  text-align: center;
-vertical-align: middle;
-padding-top: 50px;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #FFD700;
+  color: #343434;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
-.you-lost span {
-  font-size: 20px;
-  cursor: pointer;
-  position: relative;
-}
-.you-lost span:hover {
-  color: #FFD700;
+.restart-btn:hover {
+  background-color: #FFC700;
+  transform: scale(1.05);
 }
 

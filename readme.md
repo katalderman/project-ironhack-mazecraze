@@ -1,4 +1,74 @@
-MazeCraze is a personal project I'm working on for Ironhack. This browser game will be written using JS and Jquery + Canvas.
+# MazeCraze
+
+MazeCraze is a browser-based maze game built for Ironhack. Navigate the character Sake through a randomly generated maze, reach the goal (food), and avoid the enemy (Master Shredder). The game features a procedurally generated maze, real-time collision detection, and an AI-controlled enemy opponent.
+
+## Technologies Used
+- **HTML5** - Semantic markup for structure
+- **CSS3** - Styling, responsive design, and overlay effects
+- **JavaScript (Vanilla)** - Game logic, maze generation, collision detection, and game loop
+- **Canvas API** - Rendering the maze, player, goal, and enemy
+
+## Features
+- Randomly generated maze using depth-first search algorithm
+- Real-time player movement with arrow keys
+- AI-controlled enemy that chases the player
+- Collision detection for walls, goal, and enemy
+- Win condition when reaching the goal
+- Lose condition when caught by the enemy
+- Game timer and best time tracking
+- Responsive game overlay for win/lose states
+
+## How to Play
+1. Use the **arrow keys** to move Sake through the maze
+2. Reach the **goal (food)** without getting caught by **Master Shredder**
+3. Avoid walls and navigate carefully through the maze
+4. Completing the maze displays your time — try to beat your best time!
+5. Click **Restart** to play again
+
+## Installation & Running Locally
+1. Clone or download this repository
+2. Open `index.html` in a web browser
+3. The game loads automatically and is ready to play
+
+## Game Structure
+```
+project-ironhack-mazecraze/
+├── index.html          # Main HTML file
+├── css/
+│   └── style.css       # Styling for game and overlays
+├── js/
+│   └── game.js         # Core game logic, maze generation, AI
+├── images/             # Game assets (sprites and backgrounds)
+└── readme.md          # This file
+```
+
+## Implementation Approach
+- **Maze Generation**: Uses a depth-first search algorithm with backtracking to create a perfect maze
+- **Collision Detection**: Checks player position against wall arrays before allowing movement
+- **Enemy AI**: Simple pathfinding that moves toward the player's position each frame
+- **Game Loop**: Implemented with `requestAnimationFrame` for smooth 60 FPS rendering
+- **State Management**: Game states (running, won, lost) controlled by overlay display
+
+## Unsolved Problems & Future Enhancements
+- Mobile touch controls not yet implemented
+- Game is not yet fully responsive on small screens
+- Enemy AI could be more sophisticated (A* pathfinding)
+- Score/difficulty levels not implemented
+- Sound effects and background music not included
+- Multiplayer modes not yet implemented
+
+## Deployment
+This game is deployed on GitHub Pages. Visit the link in the repository URL section to play online.
+
+## Best Practices Applied
+✓ Separate HTML, CSS, and JavaScript files
+✓ Organized folder structure (css/, js/, images/)
+✓ Semantic HTML markup
+✓ DRY principles applied to CSS styling
+✓ Clean, well-commented JavaScript code
+✓ Proper game loop implementation with requestAnimationFrame
+✓ Collision detection with boundary checking
+✓ Meaningful alt text for images
 
 --------------------REQUIREMENTS------------------
 The app must:

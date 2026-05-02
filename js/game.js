@@ -10,12 +10,9 @@ var horizontalCells = 10;
 var verticalCells = 10;
 var cellSize = 75;
 
-canvas.width = 200+ cellSize * horizontalCells;
+canvas.width = 200 + cellSize * horizontalCells;
 canvas.height = cellSize * verticalCells;
 document.body.appendChild(canvas);
-
-var diagonal = Math.pow(Math.pow(horizontalCells * cellSize, 2) +
-Math.pow(verticalCells * cellSize, 2), 0.5);
 
 var theMaze = (function() {
   var horizontalCells;
@@ -289,42 +286,38 @@ var reset = function() {
   theMaze.init(horizontalCells, verticalCells, cellSize);
   theMaze.generateMaze();
   startTime = Date.now();
-  enemyMove();
+  startEnemyMove();
 };
 
 // enemy chasing player movement
-function enemyMove(){
-  setInterval(function(){
-    // console.log(enemy.x,enemy.y,player.x, player.y);
-if (enemy.x < player.x && enemy.y < player.y){
-  enemy.x++;
-  enemy.y++;
-} else if 
-  (enemy.x > player.x && enemy.y < player.y){
-enemy.x--;
-enemy.y++;
-} else if
-(enemy.x < player.x && enemy.y > player.y){
-  enemy.x++;
-  enemy.y--;
-} else if
-(enemy.x > player.x && enemy.y > player.y){
-  enemy.x--;
-  enemy.y--;
-} else if
-(enemy.x > player.x && enemy.y == player.y){
-  enemy.x--;
-} else if
-(enemy.x < player.x && enemy.y == player.y){
-  enemy.x++;
-} else if
-(enemy.x == player.x && enemy.y < player.y){
-  enemy.y++;
-} else if
-(enemy.x == player.x && enemy.y > player.y){
-  enemy.y--;
-} 
-},40) // higher = enemy moves slower
+var enemyMoveInterval = null;
+function startEnemyMove() {
+  if (enemyMoveInterval) {
+    clearInterval(enemyMoveInterval);
+  }
+  enemyMoveInterval = setInterval(function() {
+    if (enemy.x < player.x && enemy.y < player.y) {
+      enemy.x++;
+      enemy.y++;
+    } else if (enemy.x > player.x && enemy.y < player.y) {
+      enemy.x--;
+      enemy.y++;
+    } else if (enemy.x < player.x && enemy.y > player.y) {
+      enemy.x++;
+      enemy.y--;
+    } else if (enemy.x > player.x && enemy.y > player.y) {
+      enemy.x--;
+      enemy.y--;
+    } else if (enemy.x > player.x && enemy.y === player.y) {
+      enemy.x--;
+    } else if (enemy.x < player.x && enemy.y === player.y) {
+      enemy.x++;
+    } else if (enemy.x === player.x && enemy.y < player.y) {
+      enemy.y++;
+    } else if (enemy.x === player.x && enemy.y > player.y) {
+      enemy.y--;
+    }
+  }, 40);
 }
 
 /**
@@ -339,17 +332,10 @@ var update = function(modifier) {
   Math.abs(player.y - goal.y) < 0.5 * cellSize) {
     var thisTime = ((Date.now() - startTime) / 1000);
     console.log(thisTime);
-    // console.log(bestTime);
-    console.log(Date.now());
-    console.log(startTime);
     if (bestTime === 'None' || thisTime < bestTime) {
-      console.log('changing besttime');
       bestTime = thisTime;
     }
-
-
-    return gameOver();
-    reset();
+    gameOver();
   }
 };
 
@@ -391,15 +377,51 @@ var render = function() {
 };
 
 // collision detection
-// console.log("player is: ", player)
 function collides() {
-
-  if(Math.abs(player.x - enemy.x) <= 50 && Math.abs(player.y - enemy.y) <= 50){
-    // alert("noooo!")
-      document.getElementById('you-lost').style.display = "block";
-    };
+  if (Math.abs(player.x - enemy.x) <= 50 && Math.abs(player.y - enemy.y) <= 50) {
+    youLost();
   }
+}
 
+// Game over screen
+function gameOver() {
+  document.getElementById('game-over').style.display = 'block';
+}
+
+// You lost screen
+function youLost() {
+  if (enemyMoveInterval) {
+    clearInterval(enemyMoveInterval);
+  }
+  document.getElementById('you-lost').style.display = 'block';
+}
+
+// Restart game
+function restartGame() {
+  document.getElementById('game-over').style.display = 'none';
+  document.getElementById('you-lost').style.display = 'none';
+  reset();
+}
+
+// Main game loop
+var gameRunning = true;
+function main() {
+  var now = Date.now();
+  var delta = now - lastUpdateTime;
+  lastUpdateTime = now;
+  
+  if (gameRunning) {
+    update(delta / 1000);
+    render();
+    collides();
+  }
+  
+  requestAnimationFrame(main);
+}
+
+// Start the game
+reset();
+requestAnimationFrame(main);
   // if( player.x < enemy.x + enemy.width &&
   //        player.x + player.width > enemy.x &&
   //        player.y < enemy.y + enemy.height &&

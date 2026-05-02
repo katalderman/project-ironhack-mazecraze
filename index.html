@@ -2,20 +2,27 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Sake's A-Maze-Ing Life!</title>
 		<link rel="stylesheet" href="css/style.css">
-		<script
-  src="https://code.jquery.com/jquery-3.3.1.js"
-  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-  crossorigin="anonymous"></script>
 	</head>
 	<body>
-		<div>
-		<img src="images/main-img.png"><br><br>
-		<center><h1>Get Sake to the food before Master Shredder gets to her!</h1></center>
+		<div class="game-container">
+			<img src="images/main-img.png" alt="Sake the character">
+			<div class="header">
+				<h1>Get Sake to the food before Master Shredder gets to her!</h1>
+			</div>
+			<div class="overlay-container">
+				<div class="game-overlay game-over" id="game-over">
+					<img src="images/winner.jpg" alt="You won!" width="600" height="auto">
+					<p><span class="restart-btn" onclick="restartGame()">Restart</span></p>
+				</div>
+				<div class="game-overlay you-lost" id="you-lost">
+					<img src="images/enemy.gif" alt="Master Shredder">
+					<p><span class="restart-btn" onclick="restartGame()">Master Shredder killed you! <br> Restart</span></p>
+				</div>
+			</div>
+		</div>
 		<script src="js/game.js"></script>
-		<div class="game-over" id="game-over"><img src="images/winner.jpg" width="600px" height="auto"><p><span onclick="location.reload()">Restart</span></p></div>
-		<div class="you-lost" id="you-lost"><img src="images/enemy.gif"><p><span onclick="location.reload()">Master Shredder killed you! </br>Restart</span></p></div>
-	</div>
 	</body>
 </html>
