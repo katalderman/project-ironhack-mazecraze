@@ -101,11 +101,12 @@ A link to the hosted working game in the URL section of your GitHub repo
 A readme.md file with explanations of the technologies used, the approach taken, installation instructions, unsolved problems, etc.
 
 ### Suggested Ways to Get Started
-Tips
--You can find some sample landing pages at w3layouts.com/games (or by googling similar things)
--Break the project down into different steps (logic & data structures, layout and rendering, DOM manipulation & user interaction). Use whiteboards to conceptualize your game!
--Use your Development Tools (console.log, inspector, alert statements, etc) to debug and solve problems
--Work through the lessons in class & ask questions when you need to! Think about adding relevant code to your game each night, instead of, you know… procrastinating
--Commit early, commit often, don’t be afraid to break something because you can always go back in time to a previous version
--Consult documentation resources (MDN, jQuery, etc.) to understand better the tools you are using & the available help you will get
--Don’t be afraid of the black screen, make it work and, if needed, refactor your code. If you need to create code (as in console.log) to test what you are doing, you can always delete it
+
+#### Tips
+- You can find some sample landing pages at [w3layouts.com/games](https://w3layouts.com/games) (or by googling similar things)
+- Break the project down into different steps (logic & data structures, layout and rendering, DOM manipulation & user interaction). Use whiteboards to conceptualize your game!
+- Use your Development Tools (`console.log`, inspector, alert statements, etc) to debug and solve problems
+- Work through the lessons in class & ask questions when you need to! Think about adding relevant code to your game each night, instead of, you know… procrastinating
+- Commit early, commit often, don't be afraid to break something because you can always go back in time to a previous version
+- Consult documentation resources ([MDN](https://developer.mozilla.org/), [jQuery](https://jquery.com/), etc.) to understand better the tools you are using & the available help you will get
+- Don't be afraid of the black screen, make it work and, if needed, refactor your code. If you need to create code (as in `console.log`) to test what you are doing, you can always delete it
