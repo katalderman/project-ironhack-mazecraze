@@ -1,16 +1,19 @@
-// Create the canvas
+// Canvas and 2D rendering context
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
+// hWalls[row][col] === 1: horizontal wall on the top edge of cell (row, col)
+// vWalls[row][col] === 1: vertical wall on the left edge of cell (row, col)
 var hWalls;
 var vWalls;
 
-// Basic dimensions of the maze and player
+// Maze and sprite dimensions (pixels)
 var playerSize = 32;
 var horizontalCells = 10;
 var verticalCells = 10;
 var cellSize = 75;
+var wallThickness = 15; // also declared inside theMaze; this global copy is used by enemy movement
 
-canvas.width = 200 + cellSize * horizontalCells;
+canvas.width = 200 + cellSize * horizontalCells; // extra width on the right holds the timer display
 canvas.height = cellSize * verticalCells;
 document.body.appendChild(canvas);
 
@@ -19,13 +22,15 @@ var theMaze = (function() {
   var verticalCells;
   var cellSize;
   var wallThickness = 15;
-  // A 2D array to know if a cell is reachable; used during maze generation
-  var visited = [];
-  // A 2D array to know where the vertical walls are
-   vWalls = [];
-  // A 2D array to know where the horizontal walls are
-   hWalls = [];
+  var visited = []; // tracks which cells have been visited during maze generation
+  // Assigned without 'var' so they write to the outer-scope globals declared above,
+  // making wall data accessible to player/enemy collision code outside this closure.
+  vWalls = [];
+  hWalls = [];
+
   /**
+   * Initializes maze dimensions and resets all wall arrays to fully walled (1 = wall present).
+   * generateMaze() will then remove interior walls to carve the passages.
    * @param {int} _horizontalCells number of cells on the horizontal axis
    * @param {int} _verticalCells number of cells on the vertical axis
    * @param {double} _cellSize size of one cell, in pixels
@@ -42,24 +47,27 @@ var theMaze = (function() {
         visited[i][j] = 0;
       }
     }
-    // horizontal walls (1=there is a wall)
+    // hWalls has verticalCells+1 rows to include the top and bottom border walls
     for (i = 0; i < verticalCells + 1; i++) {
       hWalls[i] = [];
       for (j = 0; j < horizontalCells; j++) {
         hWalls[i][j] = 1;
       }
     }
-    // vertical walls (1=there is a wall)
+    // vWalls has horizontalCells+1 columns to include the left and right border walls
     for (i = 0; i < verticalCells; i++) {
       vWalls[i] = [];
       for (j = 0; j < horizontalCells + 1; j++)
         vWalls[i][j] = 1;
     }
   };
+
   /**
-   * @param {int} x vertical integer coordinate of the input cell
-   * @param {int} y horizontal integer coordinate of the input cell
-   * @return {array} This returns an array containing the unvisited neighboring cells.
+   * Returns unvisited orthogonal neighbors of cell (x, y).
+   * Note: x is the row (vertical axis) and y is the column (horizontal axis).
+   * @param {int} x row index of the cell
+   * @param {int} y column index of the cell
+   * @return {array} unvisited neighboring cells as [row, col] pairs
    */
   var getUnvisitedNeighbors = function(x, y) {
     var unvisitedNeighbors = [];
@@ -78,45 +86,46 @@ var theMaze = (function() {
     }
     return (unvisitedNeighbors);
   };
+
   /**
-   * Generates the maze itself; i.e. fills up the wall variables vWalls and hWalls (depth first random navigation)
-   * The path variable is used as a LIFO structure to back track when a dead end is reached
+   * Generates the maze using iterative depth-first search (random backtracker).
+   * Starts at cell [0,0], picks a random unvisited neighbor each step, removes the
+   * shared wall to carve a passage, then backtracks via the path stack when stuck.
    */
   var generateMaze = function() {
-    // current cell for generation
     var cell = [0, 0];
-    // path (last element is the current cell)
-    var path = [cell];
+    var path = [cell]; // stack: last element is the current cell
     while (path.length > 0) {
       var current = path[path.length - 1];
       visited[current[0]][current[1]] = 1;
       var potentialNeighbors = getUnvisitedNeighbors(current[0], current[1]);
       var nbNeighbors = potentialNeighbors.length;
-      // If there are no neighbor cells to visit (they are already visited),
-      // we pop the last element of path - go back one step.
       if (nbNeighbors === 0) {
+        // Dead end — backtrack one step
         path.pop();
-      } else {  // else, we pick a random reachable neighbor and destroy the wall
-        var nextCell = potentialNeighbors[Math.floor(Math.random() *
-           nbNeighbors)];
-        if (current[0] === nextCell[0]) { // vertical wall broken
+      } else {
+        var nextCell = potentialNeighbors[Math.floor(Math.random() * nbNeighbors)];
+        if (current[0] === nextCell[0]) {
+          // Same row: remove the vertical wall between the two columns.
+          // ceil(average) gives the shared wall index regardless of movement direction.
           vWalls[current[0]][Math.ceil(0.5 * (current[1] + nextCell[1]))] = 0;
         } else {
+          // Same column: remove the horizontal wall between the two rows.
           hWalls[Math.ceil(0.5 * (current[0] + nextCell[0]))][current[1]] = 0;
         }
         path.push(nextCell);
       }
     }
   };
+
   /**
-   * Uses the vWalls and hWalls variables to draw the maze (i.e. all the walls)
+   * Draws all maze walls onto the canvas using the hWalls and vWalls arrays.
    */
   var drawMaze = function() {
     ctx.beginPath();
     ctx.lineWidth = 15;
     var i;
     var j;
-    // Draw horizontal walls first
     for (i = 0; i < verticalCells + 1; i++) {
       for (j = 0; j < horizontalCells; j++)
         if (hWalls[i][j] === 1) {
@@ -124,7 +133,6 @@ var theMaze = (function() {
           ctx.lineTo((j + 1) * cellSize + wallThickness / 2, i * cellSize);
         }
     }
-    // Then draw the vertical walls
     for (i = 0; i < verticalCells; i++) {
       for (j = 0; j < horizontalCells + 1; j++)
         if (vWalls[i][j] === 1) {
@@ -135,74 +143,73 @@ var theMaze = (function() {
     ctx.strokeStyle = 'black';
     ctx.stroke();
   };
+
   /**
-   * Modifies the attributes of player to update its position.
-   * @param {objects} player the player object, that contains position data
-   * @param {array} keysPressed an array that contains key pressed data
-   * @param {double} modifier a double to indicate how much time has passed since the last update
+   * Moves the player based on held keys, clamping against maze walls.
+   * @param {object} player the player object with position and speed data
+   * @param {object} keysPressed map of currently held key codes
+   * @param {double} modifier seconds elapsed since last frame (for frame-rate-independent speed)
    */
   var updatePositions = function(player, keysPressed, modifier) {
     var targetX = player.x;
     var targetY = player.y;
-    // First update pixel-position
-    if (38 in keysPressed) { // Player holding up
+    if (38 in keysPressed) { // up arrow
       targetY = player.y - Math.min(player.speed * modifier, cellSize);
+      // Primary: block on the top wall of the current cell.
+      // Corner checks: if the player is within wallThickness of a side boundary,
+      // also block against the perpendicular wall to prevent clipping through corners.
       if (hWalls[player.cellY][player.cellX] === 1 ||
         (((player.cellX + 1) * cellSize - player.x) < wallThickness &&
         vWalls[player.cellY - 1][player.cellX + 1] === 1) ||
           ((player.x - player.cellX * cellSize) < wallThickness &&
           vWalls[player.cellY - 1][player.cellX] === 1)) {
-        player.y = Math.max(targetY,
-        player.cellY * cellSize + wallThickness);
+        player.y = Math.max(targetY, player.cellY * cellSize + wallThickness);
       } else {
         player.y = targetY;
       }
       player.cellY = Math.floor(player.y / cellSize);
     }
-    if (40 in keysPressed) { // Player holding down
+    if (40 in keysPressed) { // down arrow
       targetY = player.y + Math.min(player.speed * modifier, cellSize);
       if (hWalls[player.cellY + 1][player.cellX] === 1 ||
         (((player.cellX + 1) * cellSize - player.x) < wallThickness &&
         vWalls[player.cellY + 1][player.cellX + 1] === 1) ||
           ((player.x - player.cellX * cellSize) < wallThickness &&
           vWalls[player.cellY + 1][player.cellX] === 1)) {
-        player.y = Math.min(targetY,
-        (player.cellY + 1) * cellSize - wallThickness);
+        player.y = Math.min(targetY, (player.cellY + 1) * cellSize - wallThickness);
       } else {
         player.y += player.speed * modifier;
       }
       player.cellY = Math.floor(player.y / cellSize);
     }
-    if (37 in keysPressed) { // Player holding left
+    if (37 in keysPressed) { // left arrow
       targetX = player.x - Math.min(player.speed * modifier, cellSize);
       if (vWalls[player.cellY][player.cellX] === 1 ||
         (((player.cellY + 1) * cellSize - player.y) < wallThickness &&
         hWalls[player.cellY + 1][player.cellX - 1] === 1) ||
           ((player.y - player.cellY * cellSize) < wallThickness &&
           hWalls[player.cellY][player.cellX - 1] === 1)) {
-        player.x = Math.max(targetX,
-        player.cellX * cellSize + wallThickness);
+        player.x = Math.max(targetX, player.cellX * cellSize + wallThickness);
       } else {
         player.x -= player.speed * modifier;
       }
       player.cellX = Math.floor(player.x / cellSize);
     }
-    if (39 in keysPressed) { // Player holding right
+    if (39 in keysPressed) { // right arrow
       targetX = player.x + Math.min(player.speed * modifier, cellSize);
       if (vWalls[player.cellY][player.cellX + 1] === 1 ||
         (((player.cellY + 1) * cellSize - player.y) < wallThickness &&
         hWalls[player.cellY + 1][player.cellX + 1] === 1) ||
           ((player.y - player.cellY * cellSize) < wallThickness &&
           hWalls[player.cellY][player.cellX + 1] === 1)) {
-        player.x = Math.min(targetX,
-        (player.cellX + 1) * cellSize - wallThickness);
+        player.x = Math.min(targetX, (player.cellX + 1) * cellSize - wallThickness);
       } else {
         player.x += player.speed * modifier;
       }
       player.cellX = Math.floor(player.x / cellSize);
     }
 
-    // Then update cell-position
+    // Recalculate cell coordinates after all movement to keep them in sync with pixel position
     player.cellY = Math.floor(player.y / cellSize);
     player.cellX = Math.floor(player.x / cellSize);
   };
@@ -215,12 +222,12 @@ var theMaze = (function() {
   };
 })();
 
-// Declaration of useful time variables
+// Timing
 var startTime;
 var lastUpdateTime = Date.now();
 var bestTime = 'None';
 
-// player
+// Player sprite and state
 var playerReady = false;
 var playerImage = new Image();
 playerImage.onload = function() {
@@ -228,10 +235,10 @@ playerImage.onload = function() {
 };
 playerImage.src = 'images/player.gif';
 var player = {
-  speed: 256 // movement in pixels per second
+  speed: 256 // pixels per second
 };
 
-// Goal
+// Goal sprite and state
 var goalReady = false;
 var goalImage = new Image();
 goalImage.onload = function() {
@@ -240,9 +247,7 @@ goalImage.onload = function() {
 goalImage.src = 'images/goal.gif';
 var goal = {};
 
-var enemyY = 0; // enemyY
-
-// Enemy
+// Enemy sprite and state
 var enemyReady = false;
 var enemyImage = new Image();
 enemyImage.onload = function() {
@@ -250,11 +255,10 @@ enemyImage.onload = function() {
 };
 enemyImage.src = 'images/enemy.gif';
 var enemy = {
-  speed: 256 // movement in pixels per second
+  speed: 256 // pixels per second
 };
 
-
-// Keyboard controls
+// Track which keys are currently held down
 var keysDown = {};
 addEventListener('keydown', function(e) {
   keysDown[e.keyCode] = true;
@@ -264,10 +268,10 @@ addEventListener('keyup', function(e) {
 }, false);
 
 /**
- * Resets player and goal locations, generates a new maze, and sets the starting time
+ * Resets all entity positions, generates a new maze, and restarts the timer and enemy.
  */
 var reset = function() {
-  // Initialize player and goal in random locations
+  // +0.5 centers each sprite within its starting cell
   player.cellX = Math.floor(Math.random() * horizontalCells);
   player.cellY = Math.floor(Math.random() * verticalCells);
   player.x = (player.cellX + 0.5) * cellSize;
@@ -276,58 +280,65 @@ var reset = function() {
   goal.cellY = Math.floor(Math.random() * verticalCells);
   goal.x = (goal.cellX + 0.5) * cellSize;
   goal.y = (goal.cellY + 0.5) * cellSize;
-  // ---enemy---
   enemy.cellX = Math.floor(Math.random() * horizontalCells);
   enemy.cellY = Math.floor(Math.random() * verticalCells);
   enemy.x = (enemy.cellX + 0.5) * cellSize;
   enemy.y = (enemy.cellY + 0.5) * cellSize;
-  
-  // Initialize, generate a random maze, and sets the starting time
+
+  gameWon = false;
   theMaze.init(horizontalCells, verticalCells, cellSize);
   theMaze.generateMaze();
   startTime = Date.now();
   startEnemyMove();
 };
 
-// enemy chasing player movement
+// Enemy movement runs on its own 40ms interval, independent of the ~60fps render loop.
+// Clearing the previous interval before starting a new one prevents stacking on reset.
 var enemyMoveInterval = null;
 function startEnemyMove() {
   if (enemyMoveInterval) {
     clearInterval(enemyMoveInterval);
   }
   enemyMoveInterval = setInterval(function() {
-    if (enemy.x < player.x && enemy.y < player.y) {
-      enemy.x++;
-      enemy.y++;
-    } else if (enemy.x > player.x && enemy.y < player.y) {
-      enemy.x--;
-      enemy.y++;
-    } else if (enemy.x < player.x && enemy.y > player.y) {
-      enemy.x++;
-      enemy.y--;
-    } else if (enemy.x > player.x && enemy.y > player.y) {
-      enemy.x--;
-      enemy.y--;
-    } else if (enemy.x > player.x && enemy.y === player.y) {
-      enemy.x--;
-    } else if (enemy.x < player.x && enemy.y === player.y) {
-      enemy.x++;
-    } else if (enemy.x === player.x && enemy.y < player.y) {
-      enemy.y++;
-    } else if (enemy.x === player.x && enemy.y > player.y) {
-      enemy.y--;
+    var dx = 0, dy = 0;
+    if (enemy.x < player.x) dx = 1;
+    else if (enemy.x > player.x) dx = -1;
+    if (enemy.y < player.y) dy = 1;
+    else if (enemy.y > player.y) dy = -1;
+
+    // Handle horizontal and vertical movement separately so the enemy can slide along
+    // a wall it can't pass rather than stopping dead on diagonal approaches.
+    if (dx !== 0) {
+      var newX = enemy.x + dx;
+      if (dx > 0 && vWalls[enemy.cellY][enemy.cellX + 1] === 1) {
+        newX = Math.min(newX, (enemy.cellX + 1) * cellSize - wallThickness);
+      } else if (dx < 0 && vWalls[enemy.cellY][enemy.cellX] === 1) {
+        newX = Math.max(newX, enemy.cellX * cellSize + wallThickness);
+      }
+      enemy.x = newX;
+      enemy.cellX = Math.floor(enemy.x / cellSize);
+    }
+
+    if (dy !== 0) {
+      var newY = enemy.y + dy;
+      if (dy > 0 && hWalls[enemy.cellY + 1][enemy.cellX] === 1) {
+        newY = Math.min(newY, (enemy.cellY + 1) * cellSize - wallThickness);
+      } else if (dy < 0 && hWalls[enemy.cellY][enemy.cellX] === 1) {
+        newY = Math.max(newY, enemy.cellY * cellSize + wallThickness);
+      }
+      enemy.y = newY;
+      enemy.cellY = Math.floor(enemy.y / cellSize);
     }
   }, 40);
 }
 
 /**
- * Updates all the game elements: positions and checks for termination condition
- * @param {double} modifier a double to indicate how much time has passed since the last update
+ * Updates game state each frame: moves the player and checks the win condition.
+ * @param {double} modifier seconds elapsed since the last frame
  */
 var update = function(modifier) {
-  // Update the player's position based on the maze design
   theMaze.updatePositions(player, keysDown, modifier);
-  // If the player reaches the goal, reset the game
+  // Trigger win when the player's center is within half a cell of the goal's center
   if (Math.abs(player.x - goal.x) < 0.5 * cellSize &&
   Math.abs(player.y - goal.y) < 0.5 * cellSize) {
     var thisTime = ((Date.now() - startTime) / 1000);
@@ -339,56 +350,52 @@ var update = function(modifier) {
   }
 };
 
-
-
-
 /**
- * Renders all the objects on the canvas: the maze, the player, the goal, and score information
+ * Clears and redraws the canvas each frame: maze, sprites, and timer.
  */
 var render = function() {
-  // Clear all
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Draw the maze
   theMaze.drawMaze();
-  // Draw the goal, player and enemy
   if (goalReady) {
     ctx.drawImage(goalImage, goal.x - playerSize / 2, goal.y - playerSize / 2);
   }
   if (playerReady) {
-    ctx.drawImage(playerImage, player.x - playerSize / 2,
-      player.y - 0.75 * playerSize);
+    // -0.75 * playerSize shifts the sprite up so the feet align with the cell center
+    ctx.drawImage(playerImage, player.x - playerSize / 2, player.y - 0.75 * playerSize);
   }
   if (enemyReady) {
     ctx.drawImage(enemyImage, enemy.x - playerSize / 2, enemy.y - playerSize / 2);
   }
 
-  // Draw timer
   ctx.strokeStyle = 'black';
   ctx.fillStyle = 'black';
   ctx.font = '24px Helvetica';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  var currentTime = ((Date.now() - startTime) / 1000).toFixed(2);
+  // Freeze the displayed time at winTime once the player has won
+  var currentTime = gameWon ? winTime : ((Date.now() - startTime) / 1000).toFixed(2);
   ctx.fillText('Time: ' + currentTime, canvas.width - 160, 32);
-  // ctx.fillText('Best: ' + bestTime, canvas.width - 160, 64);
-
 
   collides();
 };
 
-// collision detection
+/**
+ * Checks if the enemy has caught the player (within 50px) and triggers a loss.
+ * The gameWon guard prevents this from firing after the player has already won.
+ */
 function collides() {
+  if (gameWon) return;
   if (Math.abs(player.x - enemy.x) <= 50 && Math.abs(player.y - enemy.y) <= 50) {
     youLost();
   }
 }
 
-// Game over screen
+// NOTE: this function declaration is overwritten at runtime by the var gameOver assignment
+// further below. Only the var version executes during gameplay.
 function gameOver() {
   document.getElementById('game-over').style.display = 'block';
 }
 
-// You lost screen
 function youLost() {
   if (enemyMoveInterval) {
     clearInterval(enemyMoveInterval);
@@ -396,60 +403,53 @@ function youLost() {
   document.getElementById('you-lost').style.display = 'block';
 }
 
-// Restart game
 function restartGame() {
   document.getElementById('game-over').style.display = 'none';
   document.getElementById('you-lost').style.display = 'none';
   reset();
 }
 
-// Main game loop
+var gameWon = false;
+var winTime = 0;
+
+// NOTE: this function declaration is overwritten at runtime by the var main assignment
+// further below. Only the var version runs the game loop.
 var gameRunning = true;
 function main() {
   var now = Date.now();
   var delta = now - lastUpdateTime;
   lastUpdateTime = now;
-  
   if (gameRunning) {
     update(delta / 1000);
     render();
     collides();
   }
-  
   requestAnimationFrame(main);
 }
 
-// Start the game
 reset();
 requestAnimationFrame(main);
-  // if( player.x < enemy.x + enemy.width &&
-  //        player.x + player.width > enemy.x &&
-  //        player.y < enemy.y + enemy.height &&
-  //        player.y + player.height > enemy.y) {
-        
 
-
-//it's game over dudes
+// Active gameOver — overwrites the function declaration above.
+// Stops the enemy, freezes the timer, and shows the win screen.
 var gameOver = function() {
+  gameWon = true;
+  winTime = ((Date.now() - startTime) / 1000).toFixed(2);
+  if (enemyMoveInterval) {
+    clearInterval(enemyMoveInterval);
+    enemyMoveInterval = null;
+  }
   document.getElementById('game-over').style.display = "block";
 };
 
-
-
-/**
- * The main game loop
- */
+// Active game loop — overwrites the function declaration above.
+// requestAnimationFrame targets ~60fps; delta normalizes movement to real elapsed time.
 var main = function() {
   var now = Date.now();
-  // Estimate the time since the last update was made
   var delta = now - lastUpdateTime;
-
-  // Update the game according to how much time has passed
   update(delta / 1000);
   render();
-
   lastUpdateTime = now;
-
   requestAnimationFrame(main);
 };
 
@@ -459,67 +459,5 @@ requestAnimationFrame = w.requestAnimationFrame ||
 w.webkitRequestAnimationFrame || w.msRequestAnimationFrame ||
 w.mozRequestAnimationFrame;
 
-// Actual functions called
 reset();
 main();
-
-// wrote this for enemy movement -- unused in final
-// switch (enemyDirection) {
-
-//   case "down":
-//   // down
-//         targetY = enemy.y + cellSize;
-//         if (hWalls[enemy.y + 1][enemy.x] === 1 ||
-//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
-//           vWalls[enemy.y + 1][enemy.x + 1] === 1) ||
-//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
-//             vWalls[enemy.y + 1][enemy.x] === 1)) {
-//           enemy.y = Math.min(targetY,
-//           (enemy.y + 1) * cellSize - wallThickness);
-//         } else {
-//           enemy.y += 1;
-//         }
-//         break;
-//         case "up":
-//         // up
-//         targetY = enemy.y + cellSize;
-//         if (hWalls[enemy.y + 1][enemy.x] === 1 ||
-//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
-//           vWalls[enemy.y + 1][enemy.x + 1] === 1) ||
-//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
-//             vWalls[enemy.y + 1][enemy.x] === 1)) {
-//           enemy.y = Math.min(targetY,
-//           (enemy.y - 1) * cellSize - wallThickness);
-//         } else {
-//           enemy.y -= 1;
-//         }
-//         break;
-//         case "right":
-//         // right
-//         targetX = enemy.x + cellSize;
-//         if (vWalls[enemy.x + 1][enemy.x] === 1 ||
-//           (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
-//           hWalls[enemy.x + 1][enemy.x + 1] === 1) ||
-//             ((enemy.x - enemy.x * cellSize) < wallThickness &&
-//             hWalls[enemy.x + 1][enemy.x] === 1)) {
-//           enemy.x = Math.min(targetX,
-//           (enemy.x + 1) * cellSize - wallThickness);
-//         } else {
-//           enemy.x += 1;
-//         }
-//         break;
-//         case "left":
-//          // left
-//               targetX = enemy.x + cellSize;
-//               if (vWalls[enemy.x + 1][enemy.x] === 1 ||
-//                 (((enemy.x + 1) * cellSize - enemy.x) < wallThickness &&
-//                 hWalls[enemy.x + 1][enemy.x + 1] === 1) ||
-//                   ((enemy.x - enemy.x * cellSize) < wallThickness &&
-//                   hWalls[enemy.x + 1][enemy.x] === 1)) {
-//                 enemy.x = Math.min(targetX,
-//                 (enemy.x - 1) * cellSize - wallThickness);
-//               } else {
-//               }
-//               break;
-//             }
-//     },100)
