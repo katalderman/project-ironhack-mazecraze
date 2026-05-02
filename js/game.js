@@ -337,6 +337,7 @@ function startEnemyMove() {
  * @param {double} modifier seconds elapsed since the last frame
  */
 var update = function(modifier) {
+  if (gameWon) return;
   theMaze.updatePositions(player, keysDown, modifier);
   // Trigger win when the player's center is within half a cell of the goal's center
   if (Math.abs(player.x - goal.x) < 0.5 * cellSize &&
@@ -380,12 +381,14 @@ var render = function() {
 };
 
 /**
- * Checks if the enemy has caught the player (within 50px) and triggers a loss.
+ * Triggers a loss if the enemy occupies the same cell as the player.
+ * Cell-based detection is inherently wall-aware: the enemy must navigate through
+ * open passages to reach the player's cell, so walls always act as a barrier.
  * The gameWon guard prevents this from firing after the player has already won.
  */
 function collides() {
   if (gameWon) return;
-  if (Math.abs(player.x - enemy.x) <= 50 && Math.abs(player.y - enemy.y) <= 50) {
+  if (enemy.cellX === player.cellX && enemy.cellY === player.cellY) {
     youLost();
   }
 }
